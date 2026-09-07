@@ -1,0 +1,717 @@
+# N.H System — Cursor Rules v3.2
+# v3.0 rewritten June 19 2026 after a live audit that found a real
+# sovereignty-gate bypass in production code (see §2A — THE LEGACY GATE).
+# v3.1 updated June 20 2026: "Nes"->Ness; added scope/frame note;
+# added §12 INCOMING (the accretive/membrane direction, NOT yet in force).
+# v3.2 reconciled [session following S19]: dual-architecture
+# reconciliation. Accretive store, reading engines, and engine tooling
+# added as current build layer. Legacy gate rules preserved in full.
+# Three-layer stack map replaces stale dual-stack entry. Five protection
+# decisions settled by Ness incorporated. Stale file map, store list,
+# and §12 status updated. No legacy protections removed or weakened.
+# This file supersedes all previous .cursorrules versions in this project.
+# DO NOT modify this file without explicit approval from Ness.
+#
+# NAME: Ness
+#
+# SCOPE / FRAME (read this first):
+# This codebase contains three architecture layers that coexist on disk.
+# They are not equally active.
+#
+#   LAYER 1 — Oldest legacy data and code. Retained on disk. Designated
+#              read-only in v3.1. Not the active build target. Whether
+#              any Layer 1 code still executes is unverified from available
+#              evidence and must not be assumed.
+#
+#   LAYER 2 — Still-running REALITY/SIMULATION gate. The active legacy
+#              sovereignty mechanism. Governs the running chat, HUD, and
+#              research pipeline. §§1B and 2A remain in force until Ness
+#              explicitly decommissions this layer.
+#
+#   LAYER 3 — Current accretive store and reading engines. The active
+#              build target. All new engine and storage development
+#              goes here.
+#
+# Do not confuse the layers. When in doubt which layer a file belongs to,
+# consult the THREE-LAYER STACK MAP in §6.
+#
+# The accretive store (Layer 3) is built and sealed as of S16.
+# The legacy gate (Layer 2) is the still-running sovereignty mechanism.
+# Reconciliation of §§1B and 2A happens when the new filter is complete
+# and Ness explicitly says the new model is active. Until then: obey
+# every rule below exactly. Both architectures need protecting right now.
+#
+# Note on the preamble's prior wording: v3.1 said "when the accretive
+# store + new gate are actually built" as a future condition. The
+# accretive store is now built and sealed (S12-S16). What remains is
+# the new filter and reading gate. Reconciliation happens when those
+# are complete and Ness says the model is active — not before.
+
+
+## IDENTITY  [PERMANENT — applies to all layers, all sessions]
+This is a sovereign personal AI system with strict memory-layer separation.
+You (Cursor) are a code assistant — NOT an autonomous agent.
+You propose. Ness approves. You implement. Never skip the approval step,
+even for "small" or "obviously correct" changes to any Protected File.
+This rule has no exceptions and no architecture dependency.
+
+
+---
+
+
+## 1. ABSOLUTE PROHIBITIONS
+
+### 1A — PERMANENT PROHIBITIONS  [apply to both architectures, always]
+
+NEVER, under any instruction, framing, or justification:
+- Touch .env, .nh_pin.json, vault contents, NH_PROMOTE_TOKEN, API keys,
+  or the PIN hash.
+- Write test or mock data into any production store — legacy or accretive.
+  Always use a separate test file or path.
+- Build a second or parallel implementation of any gating, promotion,
+  or write-validation logic outside the designated modules for each layer.
+  This codebase already has too many parallel write paths. Every new
+  module that reinvents "is this authorized or not" logic makes the next
+  audit harder and the next bypass more likely.
+
+### 1B — LEGACY GATE PROHIBITIONS  [in force while Layer 2 runs]
+
+NEVER write code that:
+- Writes a record with status INFERRED or GENERATED into a REALITY-layer
+  store through ContextRouter.write() (or any future class with a similar
+  write() method) without that write first passing through
+  promote_to_memory() in nh_context_router.py.
+- Adds a parameter, flag, wrapper, or subclass that removes or weakens
+  the existing GENERATED block in MemoryStore.write() / remember().
+- Calls remember() / promote_to_memory() with evidence_level=INFERRED
+  using a hardcoded token, a token read from a default/config value, or
+  any token not explicitly supplied by the calling flow that Ness
+  initiated.
+- Writes directly to nh_mental_network.json. The only valid writer is
+  promote_simulation_record() in nh_simulation_graph.py.
+- Merges or upserts SIMULATION-tagged documents into the REALITY ChromaDB
+  collection (nh_reality_core) in nh_vector_memory.py.
+- Labels web search results, OpenRouter synthesis output, or any
+  AI-generated content as type: REALITY, "OBJECTIVE FACTS", or VERIFIED.
+- Builds a second/parallel implementation of evidence-level gating,
+  promotion logic, or REALITY/SIMULATION classification anywhere outside
+  nh_context_router.py, nh_memory_store.py, and nh_simulation_graph.py.
+- Touches .env, .nh_pin.json, vault contents, or anything holding
+  NH_PROMOTE_TOKEN, API keys, or the PIN hash.
+
+### 1C — ACCRETIVE STORE PROHIBITIONS  [in force now for Layer 3]
+
+NEVER write code that:
+- Opens .nh_accretive_store.jsonl, .nh_readings_store.jsonl, or
+  .nh_readings_quarantine.jsonl with mode "w" or appends to them
+  directly via open(). All writes must go through the validated functions
+  in nh_accretive_store.py.
+- Bypasses _validate_reading() before appending a reading to any readings
+  store. Schema validation is mandatory for every reading record.
+- Deletes, renames, or writes to .nh_roots.sealed through any normal
+  store operation. Only Ness may remove this marker as a deliberate
+  separate act. Its removal is a prerequisite for a future authorized
+  ingest session — not authorization for that session by itself, and not
+  permission for direct writes to .nh_accretive_store.jsonl.
+- Automatically removes .nh_roots.sealed as part of any code path,
+  conditional check, or batch process.
+- Creates .nh_readings_store.jsonl as a side effect of engine development,
+  testing, or any automated process. The production readings store must
+  not exist until Ness has both: (a) created the physical authorization
+  marker .nh_readings_production_authorized as a deliberate filesystem
+  act, AND (b) approved a PROPOSED CHANGE dry-run for the first
+  production write path. If the marker is absent, any code path that
+  would create or write to .nh_readings_store.jsonl must fail closed and
+  report the reason clearly.
+  NOTE: the marker-checking behavior in append_reading() is DECIDED but
+  NOT YET IMPLEMENTED. It requires a separately approved code change to
+  nh_accretive_store.py before any code enforces it. This rule governs
+  Cursor's behavior now; the code gate follows when approved.
+- Creates .nh_readings_production_authorized automatically. Only Ness
+  creates this marker as a deliberate filesystem act. No code may create,
+  detect-and-create, or conditionally create it.
+- Writes readings to .nh_readings_store.jsonl through any path other
+  than append_reading() in nh_accretive_store.py, even when the
+  authorization marker is present.
+- Constructs a root record that omits any of the seven required fields.
+  All seven must be present: id, subject, timestamp, content, re_reads,
+  source_title, role. source_title is a required field; its value may be
+  None where no source title is known — None is explicitly permitted by
+  the root schema. Do not substitute the string "unknown" for None in
+  source_title. Do not omit the source_title key entirely.
+- Constructs a reading record that represents confidence as a single
+  number instead of the two-slot object {interpretation_confidence,
+  source_reliability}; that invents "unknown", null, an empty string,
+  an empty object, or any other sentinel as the source_reliability value
+  without verified evidence from the live _validate_reading()
+  implementation or authoritative schema contract; or that fills any
+  optional story-layer sub-value with "unknown" instead of omitting it
+  from the entry. Both keys of the confidence object must be present on
+  every reading. source_reliability must be present as a key from the
+  first reading. Its exact permitted value when reliability is not yet
+  knowable is unverified from live code and must be confirmed from
+  _validate_reading() or the authoritative schema contract before v3.2
+  is adopted. What is confirmed by the Master: the slot is present from
+  the first reading; the value is left empty until the engine can
+  honestly judge a source; "empty-when-unknown is honest" (Master §6B).
+  The exact JSON form of that emptiness is not confirmed.
+- Modifies existing root records in .nh_accretive_store.jsonl. Roots are
+  immutable once written. A re-read is a new reading record beside the
+  original, never an edit to it.
+- Silently drops the idempotency_key from a reading or reuses a key
+  already committed to any readings store.
+- Writes engine test output, gold-run output, or any development readings
+  to .nh_readings_store.jsonl. All engine output goes to the quarantine
+  path (QUARANTINE_READINGS_PATH in nh_accretive_store.py) until Ness
+  explicitly authorizes production writes via both protections above.
+- Changes the MOUTH_MODEL constant in nh_engine_minimal.py or
+  nh_engine_b.py without Ness's authorization and a re-run of both
+  sealed gold sets. The current mouth model (dolphin-llama3) is a test
+  candidate only — not the settled final N.H mouth model.
+- Touches nh_reality_core, nh_test_asm, or nh_simulation_core Chroma
+  collections during any rebuild or index operation. nh_rebuild_chroma.py
+  must never affect these collections.
+- Creates nh_baseline_engine.py without receiving:
+    CONFIRMED: create nh_baseline_engine.py
+  from Ness, completing the full dry-run protocol, and confirming all
+  §12D prerequisites are satisfied.
+
+
+---
+
+
+## 2A. THE LEGACY GATE  [in force for Layer 2 — old-stack writes only]
+
+There is exactly one authorized path from unverified content into REALITY
+for the legacy gate stack:
+
+    promote_to_memory()  —  nh_context_router.py
+        ├─ GENERATED       → always blocked, no override possible
+        ├─ INFERRED        → requires NH_PROMOTE_TOKEN or explicit
+        │                     user_confirmed=True from Ness
+        ├─ VERIFIED        → written directly
+        └─ REPORTED_SPEECH → written directly, but requires non-empty
+                               speaker AND quote fields
+
+Nothing else is authorized to put a non-VERIFIED record into a REALITY
+store. In particular:
+
+ContextRouter.write() is NOT a gate by itself. It only blocks
+(a) SIMULATION-layer records written without _internal=True, and
+(b) REALITY-layer records with status UNKNOWN. It does not check evidence
+level, does not require a token, and WILL write an INFERRED or GENERATED
+record straight into .nh_reality_store.jsonl if called directly.
+
+This is not theoretical — it is the exact bug found in the June 19 2026
+audit. nh_epistemic_sandbox.py's route_result() built a
+reality_record(status=INFERRED, ...) for any thought scored as "SIGNAL"
+and called _router.write(rl_rec) directly, skipping promote_to_memory()
+entirely. The record went straight into REALITY with no token, no review,
+no human approval — exactly the bypass this whole architecture exists to
+prevent.
+
+Rule going forward: if you are about to write a _router.write(record)
+call where record.layer == REALITY and record.status != VERIFIED,
+stop. Route it through promote_to_memory() instead.
+
+This rule governs any code that writes to the old-stack stores or calls
+old-stack gate functions. It remains in force until the legacy gate is
+explicitly decommissioned by Ness.
+
+
+## 2B. THE ACCRETIVE STORE GATE  [in force for Layer 3]
+
+The sovereignty boundary for the accretive architecture is
+nh_accretive_store.py. There is no status-label gate in this layer.
+The boundary is enforced by the module's own validated functions:
+
+    append_root()       → blocked while .nh_roots.sealed exists;
+                          schema-validates the 7-field root record;
+                          atomic append only.
+
+    append_reading()    → calls _validate_reading() first (shape gate);
+                          verifies each id in `reads` exists in sealed
+                          roots before commit; checks idempotency_key;
+                          routes to quarantine or production path based
+                          on the path argument supplied.
+                          DECIDED FUTURE BEHAVIOR (not yet implemented):
+                          production path must additionally require
+                          .nh_readings_production_authorized to exist,
+                          and must fail closed if absent. This gate
+                          requires a separately approved code change to
+                          nh_accretive_store.py before it enforces it.
+
+    _validate_reading() → gates on shape only; rejects malformed records;
+                          never rejects uncertain or low-confidence
+                          readings; never gates on meaning content.
+
+Nothing may write to .nh_accretive_store.jsonl or any readings store
+except through these functions. Direct file writes, even well-formed
+ones, are prohibited.
+
+
+---
+
+
+## 3A. LEGACY FILE MAP  [Layer 2 — old-stack functions only]
+Confirmed by direct inspection on disk, June 19 2026.
+Do not extend new functionality here. These are old-stack functions.
+Current disk state not re-verified after June 19 2026.
+
+| Function                             | Actually lives in          |
+|--------------------------------------|----------------------------|
+| promote_to_memory()                  | nh_context_router.py       |
+| guard_write()                        | nh_evidence_integrity.py   |
+| ContextRouter.write()                | nh_context_router.py       |
+| MemoryStore.write() / remember()     | nh_memory_store.py         |
+| promote_simulation_record()          | nh_simulation_graph.py     |
+| _wire_research_to_network()          | nh_hud_server.py           |
+| update_network_async()               | nh_hud_server.py           |
+
+guard_write() in nh_evidence_integrity.py had NO confirmed callers as of
+June 19 2026. Treat it as possibly dead code until a live caller is
+confirmed on disk.
+
+
+## 3B. CURRENT ARCHITECTURE FILE MAP  [Layer 3 — accretive store and engines]
+Confirmed by direct inspection, S14/S16.
+
+| Function / constant                  | Actually lives in              |
+|--------------------------------------|--------------------------------|
+| append_root()                        | nh_accretive_store.py          |
+| append_reading()                     | nh_accretive_store.py          |
+| _validate_reading()                  | nh_accretive_store.py          |
+| _validate_record()                   | nh_accretive_store.py          |
+| _check_common()                      | nh_accretive_store.py          |
+| QUARANTINE_READINGS_PATH             | nh_accretive_store.py          |
+| read_root() / run_on_gold()          | nh_engine_minimal.py           |
+| MOUTH_MODEL (Engine A)               | nh_engine_minimal.py           |
+| read_root_b() / run_on_gold()        | nh_engine_b.py                 |
+| _get_preceding_turns()               | nh_engine_b.py                 |
+| MOUTH_MODEL (Engine B)               | nh_engine_b.py                 |
+| rebuild logic / --dry-run flag       | nh_rebuild_chroma.py           |
+
+
+---
+
+
+## 4A. LEGACY STORES  [Layer 2 — documented as actively used as of
+##     June 19 2026; current disk behavior not re-verified]
+These stores belong to the Layer 2 gate stack. Do not write new
+accretive-store data into these stores. Do not treat them as the
+current build target.
+
+1. .nh_memory_store.jsonl
+   Documented as written only via MemoryStore.write() / remember(),
+   normally reached through promote_to_memory(). The long-term immutable
+   memory of the legacy gate system.
+
+2. .nh_reality_store.jsonl / .nh_simulation_store.jsonl
+   Documented as written via ContextRouter.write(). Used by
+   nh_epistemic_sandbox.py and similar scoring modules. No /review UI
+   currently reads .nh_simulation_store.jsonl per v3.1 — anything routed
+   there would be invisible to Ness. Do not treat "wrote to this store"
+   as equivalent to "queued for review" unless /review coverage is
+   confirmed in the same change.
+
+3. .nh_simulation_graph.jsonl / nh_mental_network.json
+   Documented as written via nh_hud_server.py (_wire_research_to_network(),
+   update_network_async()), promoted via promote_simulation_record() in
+   nh_simulation_graph.py. Documented as covered by the existing /review
+   page. Note: v3.1 §6 listed nh_mental_network.json as Layer 1 legacy
+   read-only while §4 described it as actively written — this
+   inconsistency in v3.1 is unresolved from available evidence. The §1B
+   prohibition on direct writes applies regardless. Treat as Layer 2
+   actively written per §4 until disk inspection resolves the conflict.
+
+Before writing any new "pending review" record through the legacy stack,
+check which store the existing /review UI actually reads and use that
+one — or add review-page coverage for the new store in the same change.
+
+
+## 4B. CURRENT STORES  [Layer 3 — accretive architecture]
+
+PRIMARY ROOTS STORE:
+- .nh_accretive_store.jsonl — 5,521 clean root records, 7-field schema.
+  No direct writes at any time. No root appends while .nh_roots.sealed
+  exists. Future appends through append_root() are possible only after
+  Ness explicitly lifts .nh_roots.sealed as a deliberate separate act
+  and separately approves the ingest session — not as a side effect of
+  any code path. Do not open with mode "w". Do not overwrite, truncate,
+  or sort.
+
+SEAL MARKER:
+- .nh_roots.sealed — zero-byte marker. append_root() refuses while it
+  exists. Do not delete, rename, or write to it through any normal store
+  operation. Only Ness may remove it as a deliberate separate act.
+  Its removal is a prerequisite for a future ingest session — not
+  authorization for that session. Removal does not permit direct writes
+  to .nh_accretive_store.jsonl; all appends must still go through
+  append_root() in nh_accretive_store.py.
+
+READINGS STORES:
+- .nh_readings_quarantine.jsonl — test-only readings store. Engine A and
+  Engine B gold-run output lives here. This is the only readings store
+  with current records. Must not be treated as the production store.
+- .nh_readings_store.jsonl — ABSENT by design. Do not create this file
+  as a side effect of any code or automated process. See §2B and §1C for
+  the dual protection requirement before this file may exist or receive
+  writes.
+
+PRODUCTION AUTHORIZATION MARKER (does not exist yet):
+- .nh_readings_production_authorized — must not be created by any code.
+  Only Ness creates it as a deliberate filesystem act. Its presence is
+  a necessary but not sufficient condition for production writes. A
+  PROPOSED CHANGE dry-run is also required. The code-level enforcement
+  of this marker in append_reading() is DECIDED but NOT YET IMPLEMENTED.
+
+CHROMA COLLECTIONS:
+- nh_roots_v1 — current active embedding index; 5,521 roots;
+  all-MiniLM-L6-v2 embeddings; built S16. Active search/retrieval
+  collection for the new architecture.
+- nh_reality_core — old Chroma index, 116,391 records. Retained until
+  nh_roots_v1 is proven in production. Do not destroy, merge, or modify.
+- nh_test_asm, nh_simulation_core — old collections. Must remain
+  untouched unless Ness separately and explicitly authorizes otherwise.
+
+No /review equivalent currently exists for the new readings stores.
+Do not assume any review UI covers accretive readings.
+
+GOLD SET FILES (all sealed — never modify):
+- NH_GOLD_SET_v1.md + .nh_gold_v1.sealed — 8 clean-bare cases, S14.
+- NH_GOLD_SET_v2_B.md + .nh_gold_v2_B.sealed — 7 context-requiring
+  cases, S16.
+- NH_GOLD_SET_CONTEXT_v1.md — drafted and approved; not yet placed in
+  nh_engine_core and not yet sealed as of the last verified record.
+  Treat as Protected when placed.
+
+
+---
+
+
+## 5. DUAL PIPELINE WARNING  [preserved in substance — still accurate]
+
+Two parallel research/search pipelines exist in this codebase:
+
+- nh_hud_server.py: web_search() → _single_angle_search() →
+  _verify_and_synthesize() → _wire_research_to_network() — the
+  audited, currently-intended pipeline (Brave Search + OpenRouter
+  synthesis).
+- nh_research_engine.py: a separate ResearchEngine class with its own
+  _search_tavily(), _search_brave(), _anchor_to_simulation(),
+  promote_finding() — documented in v3.1 as imported in nh_jarvis_core.py
+  (top-level import) and lazily inside nh_hud_server.py as of June 19
+  2026. Current import status not re-verified.
+
+Do not assume only one is active. Before extending "the" research
+pipeline, confirm with Ness which one is meant. Do not add a third.
+
+
+---
+
+
+## 6. THREE-LAYER STACK MAP
+
+LAYER 1 — OLDEST LEGACY DATA AND CODE
+(retained on disk; not the active build target; do not extend or write)
+- nh_reality_core (ChromaDB) — 116,391 records; retained until
+  nh_roots_v1 proven; current read/write status not re-verified.
+- nh_timeline.json — referenced in v3.1 as legacy; current disk
+  presence and execution status unverified.
+- nh_nightly.py — referenced in v3.1 as legacy; current disk
+  presence and execution status unverified.
+No Layer 1 code execution has been verified from available evidence.
+Do not write new records here. Do not extend.
+
+LAYER 2 — STILL-RUNNING REALITY/SIMULATION GATE STACK
+(active legacy sovereignty mechanism; §§1B and 2A in force;
+do not weaken)
+Files: nh_context_router.py, nh_memory_store.py, nh_reality_graph.py,
+nh_epistemic_sandbox.py, nh_evidence_integrity.py,
+nh_simulation_graph.py, nh_research_engine.py, nh_research_sandbox.py,
+nh_jarvis_core.py, nh_crypto.py, nh_auth.py, nh_vector_memory.py
+Stores (documented as actively used as of June 19 2026; current
+disk behavior not re-verified): .nh_memory_store.jsonl,
+.nh_reality_store.jsonl, .nh_simulation_store.jsonl,
+.nh_simulation_graph.jsonl, nh_mental_network.json
+Key concepts: promote_to_memory() one-gate rule;
+INFERRED/GENERATED/VERIFIED/REPORTED_SPEECH status labels;
+REALITY/SIMULATION separation; NH_PROMOTE_TOKEN; /review UI queue.
+Status: governs running chat, HUD, and research pipeline; remains
+active until Ness explicitly decommissions it.
+
+LAYER 3 — CURRENT ACCRETIVE STORE AND READING ENGINE STACK
+(active build target; §§1C, 2B, 3B, 4B in force)
+Files: nh_accretive_store.py, nh_engine_minimal.py, nh_engine_b.py,
+nh_rebuild_chroma.py
+Stores: .nh_accretive_store.jsonl (sealed), .nh_roots.sealed,
+.nh_readings_quarantine.jsonl (test only),
+.nh_readings_store.jsonl (absent by design),
+ChromaDB nh_roots_v1
+Status: accretive store built and sealed S16; Engine A built S14;
+Engine B built S16; Chroma rebuilt S16; production readings store
+absent by design; all new engine and storage development goes here.
+
+When a file appears in Layer 2 and also handles research or HUD writes
+(e.g. nh_hud_server.py), treat that file's write functions as Layer 2
+Protected even if its UI and routing code is in the safe-to-modify list.
+
+
+---
+
+
+## 7. PROTECTED FILES
+
+Require explicit "CONFIRMED: modify [filename]" from Ness before any
+edit. Full dry-run protocol (§8) applies to every change.
+
+LAYER 2 — LEGACY GATE STACK (protect until Ness decommissions):
+- nh_context_router.py
+- nh_memory_store.py
+- nh_evidence_integrity.py
+- nh_reality_graph.py
+- nh_epistemic_sandbox.py
+- nh_simulation_graph.py
+- nh_research_engine.py
+- nh_research_sandbox.py
+- nh_jarvis_core.py
+- nh_crypto.py
+- nh_auth.py
+- nh_vector_memory.py
+
+LAYER 3 — ACCRETIVE STORE AND ENGINE STACK (protect now):
+- nh_accretive_store.py — the complete write boundary for the new
+  architecture; append_root(), append_reading(), _validate_reading(),
+  _validate_record(), _check_common(), QUARANTINE_READINGS_PATH all
+  live here. The decided-but-not-yet-implemented marker gate for
+  .nh_readings_production_authorized must be added here when approved.
+- nh_engine_minimal.py — Engine A; gold-run production; MOUTH_MODEL
+  constant; read_root(); run_on_gold(). Any change that could affect
+  the meaning or comparability of benchmark results requires Ness's
+  authorization and a re-run of both sealed gold sets before adoption.
+  The current mouth model is a test candidate only — not the settled
+  final N.H mouth model.
+- nh_engine_b.py — Engine B; gold-run production; MOUTH_MODEL constant;
+  _get_preceding_turns(); run_on_gold(); read_root_b(). Same benchmark
+  protection as Engine A. Do not change n=3, BACKGROUND/END BACKGROUND
+  prompt framing, or context truncation behavior without understanding
+  the B3 miss cause first.
+- nh_ingest_chatgpt.py — responsible for creating root records; currently
+  inert while .nh_roots.sealed exists, but an edit made now could affect
+  a future ingest after the seal is deliberately lifted. Every proposed
+  change must identify: the exact ingest behavior being changed; the
+  effect on the 7-field root schema; the source files involved; duplicate
+  and idempotency handling; the intended destination store; whether
+  .nh_roots.sealed remains untouched; and how the change will be tested
+  without writing into the sealed production store. Note: whether
+  nh_ingest_chatgpt.py has an existing dry-run or test-path mechanism is
+  not confirmed — Cursor must propose a test approach in the dry-run
+  block. No edit may delete, rename, bypass, or automatically lift
+  .nh_roots.sealed.
+- nh_rebuild_chroma.py — rebuilds nh_roots_v1; the never-touch-old-
+  collections rule lives here. Every proposed change must state: the
+  exact rebuild behavior being changed; the source root store and
+  expected root count; the embedding model being used; the destination
+  Chroma collection; whether existing records will be replaced, appended,
+  or rebuilt; how --dry-run will be used before a full rebuild; how
+  retrieval correctness will be checked; and whether the gold sets must
+  be rerun afterward. nh_reality_core, nh_test_asm, and nh_simulation_core
+  must remain untouched unless Ness separately and explicitly authorizes
+  otherwise. No silent rename, overwrite, merge, delete, or migration of
+  those collections.
+
+NOT YET EXISTING — CREATION GATE:
+- nh_baseline_engine.py — does not currently exist. Cursor must not
+  create it without receiving:
+    CONFIRMED: create nh_baseline_engine.py
+  from Ness, completing the full dry-run protocol, and confirming all
+  §12D prerequisites are satisfied. Once created, this file is
+  automatically Full Protected: "CONFIRMED: modify nh_baseline_engine.py"
+  required before any edit, and the full dry-run protocol applies.
+
+Safe to modify without extra confirmation:
+- nh_viz_engine.py
+- nh_hud_server.py — routes/UI/HTML only. The write functions inside it
+  (update_network_async(), _wire_research_to_network(), deep_research())
+  count as Protected even though the file itself is listed here. Treat
+  those specific functions as if the file were fully protected.
+- nh_mobile_bridge.py
+- nh_metrics_tracker.py
+- check_system.py
+- test_api.py, test_*.py, test_reading_validator.py,
+  test_minimal_engine_dryrun.py
+- nh_log.py, nh_probe*.py, verify_rt.py — accretive tooling, read-mostly;
+  must not be extended to write to any Protected Store.
+
+
+---
+
+
+## 8. DRY-RUN PROTOCOL  [principle preserved; stopping conditions extended]
+
+Before writing any code that touches a Protected File or any write-path
+function, output exactly this and wait for explicit "APPROVED":
+
+    PROPOSED CHANGE:
+    - File: [filename]
+    - What changes: [one sentence]
+    - Store(s) touched: [name each store; for Layer 3 state quarantine
+      or production explicitly]
+    - Gate function used, by exact name + file: [e.g.
+      append_reading() in nh_accretive_store.py — quarantine path]
+      (If your answer here is "none", "ContextRouter.write() directly"
+      for a REALITY-bound write, or "direct file open" for any accretive
+      store write, stop — those are not valid gates. Revise before
+      showing this block again.)
+
+Then show the full proposed code — no placeholders, no
+"# ... existing code ..." — and wait for "APPROVED" before applying.
+
+
+---
+
+
+## 9. CODE QUALITY RULES  [principle preserved; Layer 3 items extended]
+- No placeholders, no # TODO — write complete blocks only.
+- No silent failures on store writes. Every function that touches a store
+  needs explicit error handling, not a bare except: pass.
+  Note: several existing functions (e.g. route_result() in
+  nh_epistemic_sandbox.py) currently use bare except Exception: pass
+  around store writes. Flag this when touching related code — do not
+  silently extend the pattern into new code.
+- Schema validation is mandatory for every payload entering any .jsonl
+  store. For Layer 3: _validate_reading() must be called before every
+  reading append; _validate_record() must be called before every root
+  append.
+- Async/threaded functions that write to stores must have their result
+  checked, not fire-and-forget.
+- The "188 seed records" docstring in _validate_record (location
+  confirmed by Master documentation; exact function body not inspected
+  in this session) must be updated to reflect the current 5,521 sealed
+  roots when that file is next touched under a CONFIRMED edit.
+
+
+---
+
+
+## 10. PULL SOVEREIGNTY  [principle preserved; production-marker item extended]
+- The system does not push unsolicited data or auto-promote anything.
+- No new autonomous background task without an explicit
+  # AUTONOMOUS: approved by user [date] comment.
+- Re-enabling any silent auto-start, scheduled task, or internet-facing
+  tunnel requires separately confirming the auth layer in front of it is
+  verified working on disk — never assumed from a comment or docstring.
+- .nh_readings_production_authorized must never be created by any
+  automated, background, or conditional code process. Its creation is a
+  Ness-only deliberate filesystem act.
+
+
+---
+
+
+## 11. BEFORE ADDING ANY NEW FEATURE THAT TOUCHES MEMORY
+[principle preserved; Layer 3 file list and cross-layer rule extended]
+
+For Layer 2 features: check whether the behavior already exists in
+nh_context_router.py, nh_memory_store.py, nh_simulation_graph.py,
+nh_evidence_integrity.py, nh_research_sandbox.py. If something close
+exists, extend it. Do not build a fourth parallel gate.
+
+For Layer 3 features: check whether the behavior already exists in
+nh_accretive_store.py first. Do not build a parallel write path to
+.nh_accretive_store.jsonl or any readings store outside
+nh_accretive_store.py. The same proliferation risk that produced the
+Layer 2 bypass applies here.
+
+For any feature that touches memory across layers: confirm with Ness
+which layer the feature belongs to before writing any code. Do not mix
+Layer 2 and Layer 3 write paths in the same function.
+
+
+---
+
+
+## 12. INCOMING — STATUS UPDATE
+
+### 12A — NOW BUILT (in force for Layer 3 work)
+
+These rules from the original §12 INCOMING now describe the built
+accretive architecture and are in force for new-stack development:
+
+- I1 — Memory only ADDS, never edits. Built and verified. append_root()
+  and append_reading() are append-only. .nh_roots.sealed enforces no new
+  root writes. The idempotency_key prevents duplicate records. A re-read
+  is a new reading record beside the original — never an edit.
+
+- I2 (partial) — Membrane: bridging in chat, not in memory. Structurally
+  realized by the quarantine-before-production discipline. Engine output
+  goes to quarantine; production writes require Ness's deliberate
+  authorization through the dual-protection mechanism. The membrane as a
+  designed component is not yet built.
+
+- I8 — Two-file store. Built. .nh_accretive_store.jsonl (sealed roots)
+  and .nh_readings_store.jsonl (readings sibling, currently absent by
+  design). Both append-only. Readings point by id via the `reads` field
+  and never copy root text.
+
+### 12B — DESIGNED BUT NOT BUILT (do not write code against these yet)
+
+Do not write code against any rule in this section until the component
+that implements it exists on disk and Ness says it is active.
+
+- I3 — One filter, every piece, no source exempt. Not built.
+  _load_raw_sources() still loads seed files to nh_reality_core by
+  filename — this hole closes when the new filter is built, not before.
+
+- I4 — Classification never locked. Not built. Depends on I1 (done)
+  and on the reread lifecycle (§7H of the Master — conceptually designed,
+  not built).
+
+- I6 — Ness steers, does not file. Not built. Per-record /review approval
+  is still the active sovereignty mechanism.
+
+- I7 — MODE is a peer web. Conceptually designed in the Master (§7A).
+  Not built as a component.
+
+### 12C — LEGACY PROTECTIONS THAT CONTINUE TO OVERRIDE
+
+During migration, any conflict between §12 rules and §§1B–2A resolves
+in favor of §§1B–2A. Specifically:
+
+- I5 — Sovereignty as standing position, not per-record approval. NOT IN
+  FORCE. The old per-record /review flow is still the active sovereignty
+  mechanism. Do not remove or weaken the Layer 2 gate on the strength of
+  this rule.
+
+- The reconciliation rule from v3.1 remains: when the new filter ships
+  and Ness says the model is active, §§1B and 2A get rewritten to
+  incorporate the membrane gate. Until that day, §§1B and 2A are law for
+  Layer 2 writes.
+
+### 12D — CREATION GATE FOR FUTURE PROTECTED FILE
+
+- nh_baseline_engine.py — does not exist. See §7 for the full creation
+  gate rule. Prerequisites before creation (§22 of the Master): search
+  pipeline complete and stable; review queue healthy for at least one
+  month; baseline sources and consent boundaries defined; system remains
+  advisory only and cannot diagnose, prescribe, or act autonomously; the
+  file's inputs, outputs, stores, and protected write paths are named
+  exactly; no wellbeing output may silently enter roots, production
+  readings, or the legacy REALITY store.
+
+
+---
+
+
+## REMINDER  [principle preserved; Layer 3 equivalent extended]
+Every shortcut around promote_to_memory() is a Layer 2 sovereignty
+violation — even if the record still technically lands in a store with
+"SIMULATION" in its name. A SIMULATION record nobody can review is not
+meaningfully different from a REALITY record nobody approved.
+
+Every direct write to .nh_accretive_store.jsonl, .nh_readings_store.jsonl,
+or .nh_readings_quarantine.jsonl that bypasses nh_accretive_store.py is
+a Layer 3 sovereignty violation — even if the record appears well-formed.
+
+When in doubt: propose, name the exact gate function and file, wait for
+approval.

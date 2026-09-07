@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="A plain-language local interface for the N.H design interview."
+    />
+    <title>N.H Design Loop</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <script src="/app.js" defer></script>
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="/" aria-label="N.H Design Loop home">
+        <span class="brand-mark" aria-hidden="true">N.H</span>
+        <span>
+          <strong>Design Loop</strong>
+          <small>Your decisions and the work around them</small>
+        </span>
+      </a>
+      <div class="topbar-status" id="topbarStatus">
+        <span class="status-dot" aria-hidden="true"></span>
+        <span>Checking N.H…</span>
+      </div>
+    </header>
+
+    <main class="page-shell">
+      <aside class="context-card" aria-labelledby="contextHeading">
+        <p class="eyebrow" id="contextHeading">You’re working on</p>
+        <h1 id="plainName">Understanding the current N.H work</h1>
+        <p class="technical-name">
+          <span>Technical package</span>
+          <strong id="technicalName">Loading…</strong>
+        </p>
+
+        <div class="package-position" aria-label="Package position">
+          <div>
+            <span>Framework</span>
+            <strong id="frameworkName">Loading…</strong>
+          </div>
+          <div>
+            <span>Current part</span>
+            <strong id="currentPart">Loading…</strong>
+          </div>
+          <div>
+            <span>Bundle placement</span>
+            <strong id="bundlePlacement">Loading…</strong>
+          </div>
+        </div>
+
+        <section class="context-section">
+          <h2>What this part does</h2>
+          <p id="purpose">Checking the current design context.</p>
+        </section>
+
+        <section class="context-section stage-section">
+          <h2>Where we are</h2>
+          <div class="stage-badge" id="stageBadge">
+            <span class="stage-icon" aria-hidden="true"></span>
+            <span id="stageLabel">Checking the current N.H design</span>
+          </div>
+          <p id="stageSummary"></p>
+        </section>
+
+        <section class="context-section why-section">
+          <h2 id="whyHeading">Why you’re being asked</h2>
+          <p id="whyText">You will only be interrupted if your judgment is required.</p>
+        </section>
+
+        <details class="technical-details" id="packageDetails">
+          <summary>Technical details</summary>
+          <dl>
+            <div><dt>Candidate</dt><dd id="candidateFilename">—</dd></div>
+            <div><dt>Branch</dt><dd id="branch">—</dd></div>
+            <div><dt>Design state</dt><dd id="sourceState">—</dd></div>
+            <div><dt>Mode</dt><dd id="mode">—</dd></div>
+          </dl>
+        </details>
+      </aside>
+
+      <section class="work-area" aria-labelledby="workAreaHeading">
+        <div class="work-heading">
+          <div>
+            <p class="eyebrow" id="workEyebrow">The live design loop</p>
+            <h2 id="workAreaHeading">What’s changing</h2>
+          </div>
+          <button class="quiet-button" id="refreshButton" type="button">
+            Refresh
+          </button>
+        </div>
+
+        <nav class="view-tabs" aria-label="Design loop views" role="tablist">
+          <button id="decisionsTab" class="view-tab" type="button" role="tab" aria-controls="decisionsPanel" aria-selected="false" data-panel="decisionsPanel">
+            Your decisions
+            <span class="tab-count hidden" id="decisionCount">0</span>
+          </button>
+          <button id="changesTab" class="view-tab active" type="button" role="tab" aria-controls="changesPanel" aria-selected="true" data-panel="changesPanel">
+            What’s changing
+          </button>
+          <button id="statusTab" class="view-tab" type="button" role="tab" aria-controls="statusPanel" aria-selected="false" data-panel="statusPanel">
+            Current status
+          </button>
+          <button id="technicalTab" class="view-tab" type="button" role="tab" aria-controls="technicalPanel" aria-selected="false" data-panel="technicalPanel">
+            Technical details
+          </button>
+        </nav>
+
+        <div class="notice hidden" id="notice" role="status" aria-live="polite"></div>
+
+        <section id="decisionsPanel" class="view-panel hidden" role="tabpanel" aria-labelledby="decisionsTab">
+          <div class="loading-card" id="loadingCard" aria-live="polite">
+            <div class="loading-line wide"></div>
+            <div class="loading-line"></div>
+            <div class="loading-line short"></div>
+          </div>
+
+          <div class="empty-state hidden" id="emptyState">
+            <div class="empty-symbol" aria-hidden="true">✓</div>
+            <p class="eyebrow">Nothing needs your decision right now</p>
+            <h3 id="emptyTitle">The mechanical work can continue without you.</h3>
+            <p id="emptyText">
+              When a genuine meaning or policy choice appears, it will show here with
+              the full context around it.
+            </p>
+            <div class="flow-note">
+              <span>Mechanical problem</span>
+              <i aria-hidden="true">→</i>
+              <span>Correction candidate</span>
+              <i aria-hidden="true">→</i>
+              <span>Fresh audit</span>
+            </div>
+          </div>
+
+          <div class="questions" id="questions" aria-live="polite"></div>
+        </section>
+
+        <section id="changesPanel" class="view-panel" role="tabpanel" aria-labelledby="changesTab">
+          <article class="since-card" id="sinceCard">
+            <div>
+              <p class="eyebrow">Authenticated mechanical history</p>
+              <h3 id="sinceTitle">No confirmed changes recorded yet</h3>
+              <p id="sinceSummary">When the automatic supervisor observes a proved audit or promoted correction, it will appear here.</p>
+            </div>
+            <div class="summary-numbers" aria-label="Change totals">
+              <div><strong id="correctionCount">0</strong><span>corrections</span></div>
+              <div><strong id="problemCount">0</strong><span>problems found</span></div>
+              <div><strong id="passCount">0</strong><span>PASS results</span></div>
+            </div>
+            <p class="policy-proof" id="policyProof">Whether meaning or policy stayed unchanged has not been separately proved.</p>
+          </article>
+
+          <div class="change-feed" id="changeFeed" aria-live="polite"></div>
+          <div class="empty-feed" id="emptyFeed">
+            <span aria-hidden="true">↻</span>
+            <h3>The trustworthy live feed is ready for supervised events.</h3>
+            <p>It will use controller-confirmed findings, promoted candidate identities, and fresh audit results—not Claude’s own claim that it fixed something.</p>
+          </div>
+        </section>
+
+        <section id="statusPanel" class="view-panel hidden" role="tabpanel" aria-labelledby="statusTab">
+          <article class="status-hero" id="statusHero">
+            <span class="status-orbit" aria-hidden="true"></span>
+            <p class="eyebrow">Current workflow state</p>
+            <h3 id="supervisorLabel">Checking what should happen next</h3>
+            <p id="supervisorSummary">The current package state is being checked.</p>
+          </article>
+
+          <div class="state-guide">
+            <article><span>1</span><div><strong>Working</strong><p>Mechanical work continues automatically.</p></div></article>
+            <article><span>2</span><div><strong>Diagnosing</strong><p>A stubborn problem receives a fresh approach instead of blind repetition.</p></div></article>
+            <article><span>3</span><div><strong>Waiting safely</strong><p>Temporary failures preserve state and recover before continuing.</p></div></article>
+            <article><span>4</span><div><strong>Needs you</strong><p>Only a real decision, practical action, or final acceptance interrupts you.</p></div></article>
+          </div>
+
+          <dl class="status-facts" id="statusFacts">
+            <div><dt>What N.H is waiting on</dt><dd id="statusDependency">Nothing is blocking mechanical work.</dd></div>
+            <div><dt>Will N.H retry by itself?</dt><dd id="statusWillRetry">—</dd></div>
+            <div><dt>Bounded attempts left in this episode</dt><dd id="statusAttemptsLeft">—</dd></div>
+            <div><dt>Bounded output retries left</dt><dd id="statusOutputRetriesLeft">—</dd></div>
+            <div><dt>Bounded availability checks left</dt><dd id="statusProbesLeft">—</dd></div>
+            <div><dt>Named practical action</dt><dd id="statusUserActionCode">None</dd></div>
+          </dl>
+          <p class="status-note" id="statusUnreconciled" hidden>
+            N.H started one model request, cannot yet prove its outcome, and will not send it again.
+          </p>
+
+          <article class="acceptance-card hidden" id="acceptanceCard">
+            <p class="eyebrow" id="acceptanceEyebrow">Ready for your acceptance</p>
+            <h3 id="acceptanceHeadline">This exact design candidate passed its required mechanical audit.</h3>
+            <p class="acceptance-meaning" id="acceptanceMeaning"></p>
+            <p class="acceptance-reason" id="acceptanceReason" hidden></p>
+
+            <!--
+              The SIMPLE VIEW is mandatory. All eight parts are rendered in
+              plain language, in order, before the Accept control. It is never
+              collapsed by default, never behind a tab, and never optional.
+              Every part is inserted as a TEXT NODE, never as HTML.
+            -->
+            <div class="acceptance-explanation" id="acceptanceExplanation"></div>
+
+            <!--
+              The TECHNICAL VIEW is expandable, alongside. Identities and
+              digests appear here as EVIDENCE, never as a claim, and never as
+              a substitute for the plain-language explanation above.
+            -->
+            <details class="acceptance-technical" id="acceptanceTechnical" hidden>
+              <summary>Technical view — identities and digests, evidence only</summary>
+              <dl id="acceptanceTechnicalList"></dl>
+            </details>
+
+            <div class="acceptance-actions">
+              <button class="primary-button" type="button" id="acceptanceButton" disabled>Accept this exact candidate for design-only status</button>
+              <p class="acceptance-note" id="acceptanceNote">N.H is checking whether this action can be offered at all.</p>
+            </div>
+          </article>
+        </section>
+
+        <section id="technicalPanel" class="view-panel hidden" role="tabpanel" aria-labelledby="technicalTab">
+          <article class="page-technical" id="pageTechnical">
+            <h3>Verified workflow details</h3>
+            <dl>
+              <div><dt>Questions ready</dt><dd id="questionsReady">0</dd></div>
+              <div><dt>Answers preserved</dt><dd id="answersPreserved">0</dd></div>
+              <div><dt>Question coverage check</dt><dd id="coverageStatus">—</dd></div>
+              <div><dt>Interview records</dt><dd id="journalRecords">—</dd></div>
+              <div><dt>Authenticated supervisor records</dt><dd id="supervisorJournalRecords">—</dd></div>
+              <div><dt>Supervisor authority</dt><dd id="supervisorEvidence">—</dd></div>
+              <div><dt>Bundle placement</dt><dd id="technicalBundlePlacement">Not decided yet</dd></div>
+              <div><dt>Controlled component ID</dt><dd id="technicalComponentId">Open — none</dd></div>
+              <div><dt>Register ID</dt><dd id="technicalRegisterId">Open — none</dd></div>
+            </dl>
+          </article>
+          <article class="page-technical" id="supervisorTechnical">
+            <h3>Authenticated supervisor evidence</h3>
+            <p class="detail-copy">
+              These are identities and digests recorded by the controller. They are
+              evidence only: none of them is a claim that anything passed, was
+              fixed, was accepted, adopted, installed, integrated, committed, or
+              pushed.
+            </p>
+            <dl id="supervisorTechnicalList"></dl>
+          </article>
+        </section>
+      </section>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,32 @@
+# Secrets / credentials
+*.key
+*.pem
+*.p12
+.env
+.env.*
+*credentials*
+*secret*
+
+# Local AI/tool state
+.claude/
+.codex/
+.agents/
+.codex-review-checkpoints/
+
+# Runtime / live state
+nh_interview_state/
+nh_interview_state.disconnected-before-full-restart/
+interview_ui/.nh_supervisor_state/
+*.lock
+*.log
+
+# Python generated files
+__pycache__/
+*.pyc
+
+# Local tunnel/runtime material
+chatgpt_mcp/tunnel-profiles/
+chatgpt_mcp/tunnel-client-v0.0.12
+
+# Temporary test material
+write-test/
